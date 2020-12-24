@@ -4,3 +4,4 @@ Keras
 tqdm
 tensorflow
 pandas
+scikit-learn

@@ -1,9 +1,8 @@
 import os
 
-from src.database.ImageExtractor import ImageExtractor
+from src.ImageExtractor import ImageExtractor
 from src.feature_extractors.HOGExtractor import HOGExtractor
 from metrics import get_normalized_rank
-from src.feature_extractors.ResNetExtractor import ResNetExtractor
 from src.metrics.EuclideanDistance import EuclideanDistance
 
 from tqdm import tqdm

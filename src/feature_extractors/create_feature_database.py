@@ -35,3 +35,23 @@ def create_database(images_path, database_filename, feature_extractor):
         features_database.write(filename.split('.')[0] + ',' + ','.join(str(x) for x in features_averaged) + '\n')
 
     features_database.close()
+
+
+def get_feature_vectors_given_image_codes(image_code_queries, features_database_path):
+    database_file = open(features_database_path, 'r')
+
+    image_code_list = []
+    fv_list = []
+
+    while True:
+        line = database_file.readline()
+        if not line:
+            break
+        data = line.split(",")
+        image_code = data[0]
+
+        if image_code in image_code_queries:
+            image_code_list.append(image_code)
+            fv_list.append(np.asarray(data[1:]).astype(float))
+    database_file.close()
+    return image_code_list, fv_list

@@ -21,12 +21,20 @@ def get_similarities(feature_vector_query, database_path, similarity_metric):
 
         image_code_list.append(image_code)
         distance_list.append(distance)
+    database_file.close()
 
     similarity_df = pd.DataFrame({'distance': distance_list,
                                   'image_code': image_code_list}).sort_values(by='distance').reset_index()
     del similarity_df['index']
     similarity_df['rank'] = similarity_df.index + 1
     return similarity_df
+
+
+def get_similarities_for_given_feature_vectors(feature_vector_query, feature_vector_list, similarity_metric):
+    similarity_list = []
+    for feature_vector in feature_vector_list:
+        similarity_list.append(similarity_metric.calculate_distance(feature_vector, feature_vector_query))
+    return similarity_list
 
 
 def get_same_class_similarities(similarity_df, image_class):
