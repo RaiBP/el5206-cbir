@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from sklearn.cluster import KMeans
 
-from metrics import get_similarities_for_given_feature_vectors
+from src.metrics import get_similarities_for_given_feature_vectors
 from src.feature_extractors.create_feature_database import get_feature_vectors_given_image_codes
 
 MAIN_PATH = os.path.dirname(os.path.dirname(os.getcwd()))
@@ -78,7 +78,7 @@ def get_distances_to_centroids(fv_query, centroid_database_path, similarity_metr
 
 
 def get_closest_centroid(fv_query, centroid_database_path, similarity_metric):
-    return get_distances_to_centroids(fv_query, centroid_database_path, similarity_metric)[0].index
+    return get_distances_to_centroids(fv_query, centroid_database_path, similarity_metric).index[0]
 
 
 def get_image_codes_for_given_centroid(query_cluster_index, cluster_database_path):
@@ -100,15 +100,28 @@ def get_image_codes_for_given_centroid(query_cluster_index, cluster_database_pat
     return image_code_list
 
 
-def get_feature_vectors_for_given_centroid(query_centroid_index, features_database_path, centroid_database_path):
-    image_codes = get_image_codes_for_given_centroid(query_centroid_index, centroid_database_path)
+def get_feature_vectors_for_given_centroid(query_centroid_index, features_database_path, cluster_database_path):
+    image_codes = get_image_codes_for_given_centroid(query_centroid_index, cluster_database_path)
     img_in_cluster_codes, fv_in_cluster = get_feature_vectors_given_image_codes(image_codes, features_database_path)
     return img_in_cluster_codes, fv_in_cluster
 
 
 def get_similarities_for_given_centroid(query_centroid_index, feature_vector_query, features_database_path,
-                                        centroid_database_path, similarity_metric):
+                                        cluster_database_path, similarity_metric):
     img_codes, fv_in_cluster = get_feature_vectors_for_given_centroid(query_centroid_index, features_database_path,
-                                                                      centroid_database_path)
+                                                                      cluster_database_path)
     similarities = get_similarities_for_given_feature_vectors(feature_vector_query, fv_in_cluster, similarity_metric)
+
     return img_codes, similarities
+
+
+def get_similarities_with_clustering(fv_query, centroid_database_path, cluster_database_path, features_database_path,
+                                     similarity_metric):
+    best_centroid = get_closest_centroid(fv_query, centroid_database_path, similarity_metric)
+    img_codes, similarities = get_similarities_for_given_centroid(best_centroid, fv_query, features_database_path,
+                                                                  cluster_database_path, similarity_metric)
+    similarity_df = pd.DataFrame({'distance': similarities,
+                                  'image_code': img_codes}).sort_values(by='distance').reset_index()
+    del similarity_df['index']
+    similarity_df['rank'] = similarity_df.index + 1
+    return similarity_df

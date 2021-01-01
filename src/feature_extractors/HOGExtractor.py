@@ -3,13 +3,14 @@ from skimage.feature import hog
 
 
 class HOGExtractor:
-    def __init__(self, desired_height=2048, desired_width=2304, cell_size=128, cells_per_block=3):
+    def __init__(self, desired_height=2048, desired_width=2304, cell_size=256, cells_per_block=3):
         self.desired_height = desired_height
         self.desired_width = desired_width
         self.cell_size = cell_size
         self.cells_per_block = cells_per_block
+        self.name = 'HOG'
 
-    def extract_features(self, file_path, use_vector_compression=False):
+    def extract_features(self, file_path):
         image = cv2.imread(file_path, cv2.IMREAD_COLOR)
         image_resized = self.image_resize(image)
         image_padded = self.image_padding(image_resized)
