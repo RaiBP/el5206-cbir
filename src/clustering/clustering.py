@@ -3,11 +3,10 @@ import pandas as pd
 import os
 from sklearn.cluster import KMeans
 
-from src.metrics import get_similarities_for_given_feature_vectors
+from src.similarity_functions import get_similarities_for_given_feature_vectors, get_normalized_rank_given_similarities
 from src.feature_extractors.create_feature_database import get_feature_vectors_given_image_codes
 
 MAIN_PATH = os.path.dirname(os.path.dirname(os.getcwd()))
-DB_PATH = os.path.join(MAIN_PATH, 'feature_database', 'hog_features.txt')
 
 
 def get_feature_vector_matrix(feature_vector_database_path):
@@ -125,3 +124,25 @@ def get_similarities_with_clustering(fv_query, centroid_database_path, cluster_d
     del similarity_df['index']
     similarity_df['rank'] = similarity_df.index + 1
     return similarity_df
+
+
+def get_normalized_rank_with_clustering(fv_query, class_query, features_database_path, cluster_database_path,
+                                        centroid_database_path, similarity_metric, number_of_images):
+    centroid_distances = get_distances_to_centroids(fv_query, centroid_database_path, similarity_metric)
+
+    similarity_df_list = []
+
+    for idx in range(len(centroid_distances)):
+        current_centroid = centroid_distances.index[idx]
+        img_code, similarity = get_similarities_for_given_centroid(current_centroid, fv_query, features_database_path,
+                                                                   cluster_database_path, similarity_metric)
+
+        similarity_df = pd.DataFrame({'distance': similarity,
+                                      'image_code': img_code}).sort_values(by='distance').reset_index()
+        similarity_df_list.append(similarity_df)
+
+    total_similarities_df = pd.concat(similarity_df_list).reset_index()
+    del total_similarities_df['index']
+    total_similarities_df['rank'] = total_similarities_df.index + 1
+
+    return get_normalized_rank_given_similarities(total_similarities_df, class_query, number_of_images)

@@ -17,11 +17,11 @@ def get_database_images(images_path):
     return database_images
 
 
-def create_database(images_path, database_folder, database_path, feature_extractor):
+def create_database(images_path, database_folder, database_filename, feature_extractor):
     if not os.path.exists(database_folder):
         os.makedirs(database_folder)
 
-    features_database = open(database_path, 'w+')
+    features_database = open(database_filename, 'w+')
 
     database_images = get_database_images(images_path)
 
@@ -31,10 +31,10 @@ def create_database(images_path, database_folder, database_path, feature_extract
         features_database.write(filename.split('.')[0] + ',' + ','.join(str(x) for x in features) + '\n')
 
     features_database.close()
-    print(f'{feature_extractor.name} feature database created in {database_path}')
+    print(f'{feature_extractor.name} feature database created in {database_filename}')
 
 
-def get_feature_vectors_given_image_codes(image_code_queries, features_database_path):
+def get_feature_vectors_given_image_codes(image_codes, features_database_path):
     database_file = open(features_database_path, 'r')
 
     image_code_list = []
@@ -47,7 +47,7 @@ def get_feature_vectors_given_image_codes(image_code_queries, features_database_
         data = line.split(",")
         image_code = data[0]
 
-        if image_code in image_code_queries:
+        if image_code in image_codes:
             image_code_list.append(image_code)
             fv_list.append(np.asarray(data[1:]).astype(float))
     database_file.close()

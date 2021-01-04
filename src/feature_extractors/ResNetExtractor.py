@@ -8,7 +8,7 @@ import numpy as np
 
 class ResNetExtractor:
     def __init__(self):
-        self.model = ResNet50(weights='imagenet', pooling=max, include_top=False)
+        self.model = ResNet50(weights='imagenet', include_top=False)
         self.name = 'ResNet'
 
     def extract_features(self, file_path):
